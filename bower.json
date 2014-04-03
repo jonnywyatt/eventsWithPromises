@@ -1,0 +1,10 @@
+{
+  "name": "eventsWithPromises",
+  "version": "0.1.0",
+  "ignore": [
+    ".jshintrc"
+  ],
+  "dependencies": {
+    "jquery": null
+  }
+}
