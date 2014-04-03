@@ -1,8 +1,8 @@
-define(['jquery'], function($) {
+define(['jquery'], function ($) {
   var subscriptions = {};
 
   return {
-    subscribe: function(eventName, callback, context) {
+    subscribe: function (eventName, callback, context) {
       var found = false;
 
       if (!eventName || (typeof eventName !== 'string')) {
@@ -30,18 +30,35 @@ define(['jquery'], function($) {
       }
     },
 
-    publish: function(eventName, data) {
-      var subscriptionsForEvent;
+    publish: function (eventName, data, promise) {
+      var subscriptionsForEvent,
+          promises = [];
+
       if (subscriptions[eventName]) {
-        debugger;
-       subscriptionsForEvent = subscriptions[eventName];
+        subscriptionsForEvent = subscriptions[eventName];
+        data = data || {};
         for (var i = 0, j = subscriptionsForEvent.length; i < j; i++) {
+          if (promise) {
+            data.promise = $.Deferred();
+            promises.push(data.promise);
+          }
           if (subscriptionsForEvent[i].context) {
             subscriptionsForEvent[i].context.call(context, data)
           } else {
             subscriptionsForEvent[i].callback(data);
           }
         }
+        if (promise) {
+          debugger;
+          $.when(promises)
+              .done(function () {
+                promise.resolve();
+              })
+              .fail(function () {
+                promise.reject();
+              })
+        }
+
       }
     }
   }
