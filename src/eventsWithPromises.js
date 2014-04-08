@@ -3,6 +3,13 @@ define(['jquery'], function ($) {
 
   return {
 
+    /**
+     * Add a subscription to the specified event name. If a context is supplied, the subscription
+     * can later be removed using unsubscribe
+     * @param {string} eventName
+     * @param {function} callback
+     * @param {object} [context]
+     */
     subscribe: function (eventName, callback, context) {
       var found = false;
 
@@ -31,6 +38,12 @@ define(['jquery'], function ($) {
       }
     },
 
+    /**
+     * Unsubscribe from the supplied event. The original subscription must have supplied a context, so the
+     * it can be found in the stored list of subscriptions.
+     * @param {string} eventName
+     * @param {object} context
+     */
     unsubscribe: function(eventName, context) {
       if (!eventName || (typeof eventName !== 'string')) {
         throw "Event name not supplied to unsubscribe method";
@@ -48,10 +61,21 @@ define(['jquery'], function ($) {
       }
     },
 
+    /**
+     * Unsubscribe all events
+     */
     unsubscribeAll: function() {
       subscriptions = {};
     },
 
+    /**
+     * Publish an event. If a promise is supplied, then every listener will be supplied with its own individual
+     * promise, which it can resolve or reject. If all are resolved successfully, the main promise will be resolved.
+     * If even one of them is rejected or fails, the main promise will fail.
+     * @param {string} eventName
+     * @param {*} data
+     * @param {object} [promise]
+     */
     publish: function (eventName, data, promise) {
       var subscriptionsForEvent,
           promises = [];
