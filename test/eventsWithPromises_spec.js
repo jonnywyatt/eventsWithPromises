@@ -1,6 +1,6 @@
 describe("subscription", function () {
 
-  beforeEach(function (done) {
+  before(function (done) {
     var self = this;
     requirejs(['src/eventsWithPromises', 'jquery'], function (eventsWithPromises, $) {
       self.eventsWithPromises = eventsWithPromises;
@@ -12,7 +12,6 @@ describe("subscription", function () {
 
   afterEach(function() {
     this.eventsWithPromises.unsubscribeAll();
-    this.eventsWithPromises = null;
   });
 
   it("adds a subscription if event name and callback supplied", function () {
@@ -25,10 +24,7 @@ describe("subscription", function () {
     sinon.assert.calledWith(spy, data);
   });
 
-  xit("throws an error if subscription params not supplied", function() {
-
-  });
-
+  
   it("removes a subscription if event name and context supplied", function () {
     var spy = sinon.spy(),
         myObj = {};
