@@ -28,7 +28,7 @@ npm install
 
 then
 
-```
+```sh
 npm test
 # ./node_modules/karma/bin/karma start test/karma.conf.js --single-run
 ```
