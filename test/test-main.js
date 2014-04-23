@@ -23,7 +23,7 @@ require.config({
   callback: window.__karma__.start,
 
   paths: {
-    jquery: 'bower_components/jquery/dist/jquery'
+    'rsvp': 'bower_components/rsvp/rsvp.amd'
   }
 
 });

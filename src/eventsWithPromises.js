@@ -1,4 +1,4 @@
-define(['jquery'], function ($) {
+define(['rsvp'], function (RSVP) {
   var subscriptions = {};
 
   return {
@@ -44,7 +44,7 @@ define(['jquery'], function ($) {
      * @param {string} eventName
      * @param {object} context
      */
-    unsubscribe: function(eventName, context) {
+    unsubscribe: function (eventName, context) {
       if (!eventName || (typeof eventName !== 'string')) {
         throw "Event name not supplied to unsubscribe method";
       }
@@ -64,43 +64,39 @@ define(['jquery'], function ($) {
     /**
      * Unsubscribe all events
      */
-    unsubscribeAll: function() {
+    unsubscribeAll: function () {
       subscriptions = {};
     },
 
     /**
-     * Publish an event. If a promise is supplied, then every listener will be supplied with its own individual
+     * Publish an event. Every listener will be supplied with its own individual
      * promise, which it can resolve or reject. If all are resolved successfully, the main promise will be resolved.
      * If even one of them is rejected or fails, the main promise will fail.
      * @param {string} eventName
      * @param {*} data
-     * @param {object} [promise]
+     * @returns {object} Promise
      */
-    publish: function (eventName, data, promise) {
+    publish: function (eventName, data) {
       var subscriptionsForEvent,
-          promises = [];
+          promises = [],
+          deferreds = [],
+          master;
 
       if (subscriptions[eventName]) {
         subscriptionsForEvent = subscriptions[eventName];
-        if (promise) {
-          for (var i = 0, j = subscriptionsForEvent.length; i < j; i++) {
-            promises.push($.Deferred());
-          }
-          $.when.apply($, promises)
-              .done(function () {
-                promise.resolve();
-              })
-              .fail(function () {
-                promise.reject();
-              });
+        for (var i = 0, j = subscriptionsForEvent.length; i < j; i++) {
+          deferreds.push(RSVP.defer());
+          promises.push(deferreds[i].promise);
         }
+        master = RSVP.allSettled(promises);
         for (var i = 0, j = subscriptionsForEvent.length; i < j; i++) {
           if (subscriptionsForEvent[i].context) {
-            subscriptionsForEvent[i].callback.call(subscriptionsForEvent[i].context, data, promises[i] || null)
+            subscriptionsForEvent[i].callback.call(subscriptionsForEvent[i].context, data, deferreds[i] || null)
           } else {
-            subscriptionsForEvent[i].callback(data, promises[i] || null);
+            subscriptionsForEvent[i].callback(data, deferreds[i] || null);
           }
         }
+        return master;
 
       }
     }

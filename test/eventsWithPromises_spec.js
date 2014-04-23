@@ -2,15 +2,15 @@ describe("subscription", function () {
 
   before(function (done) {
     var self = this;
-    requirejs(['src/eventsWithPromises', 'jquery'], function (eventsWithPromises, $) {
+    requirejs(['src/eventsWithPromises', 'rsvp'], function (eventsWithPromises, RSVP) {
       self.eventsWithPromises = eventsWithPromises;
-      self.$ = $;
+      self.RSVP = RSVP;
       done();
     }, done);
 
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.eventsWithPromises.unsubscribeAll();
   });
 
@@ -24,7 +24,6 @@ describe("subscription", function () {
     sinon.assert.calledWith(spy, data);
   });
 
-  
   it("removes a subscription if event name and context supplied", function () {
     var spy = sinon.spy(),
         myObj = {};
@@ -48,27 +47,30 @@ describe("subscription", function () {
       assert(promise !== null, 'Promise supplied to listener');
       done();
     });
-    this.eventsWithPromises.publish('myEvent', null, this.$.Deferred());
+    this.eventsWithPromises.publish('myEvent', null);
   });
 
   describe("resolution of promises", function () {
 
     beforeEach(function (done) {
-      this.promise = this.$.Deferred();
+      var self = this;
+
+      this.resolved = sinon.spy();
       this.eventsWithPromises.subscribe('myEvent', function (data, promise) {
         promise.resolve();
       });
       this.eventsWithPromises.subscribe('myEvent', function (data, promise) {
         promise.resolve();
       });
-      this.promise.always(function() {
-        done();
-      });
-      this.eventsWithPromises.publish('myEvent', null, this.promise);
+      this.eventsWithPromises.publish('myEvent', null)
+          .then(function(results){
+            self.resolved(results[1].state);
+            done();
+          });
     });
 
-    it("resolves the promise sent with the event when all listeners have resolved theirs", function () {
-      assert.equal(this.promise.state(), 'resolved', 'promise resolved');
+    it("resolves the promise returned by publish when all listeners have resolved theirs", function () {
+      sinon.assert.calledWith(this.resolved, 'fulfilled');
     });
 
   });
@@ -76,23 +78,54 @@ describe("subscription", function () {
   describe("rejection of promises", function () {
 
     beforeEach(function (done) {
-      this.promise = this.$.Deferred();
-      this.eventsWithPromises.subscribe('myEvent2', function (data, promise) {
-        promise.reject();
+      var self = this;
+
+      this.rejected = sinon.spy();
+      this.eventsWithPromises.subscribe('myEvent2', function (data, deferred) {
+        deferred.reject();
       });
-      this.eventsWithPromises.subscribe('myEvent2', function (data, promise) {
-        promise.resolve();
+      this.eventsWithPromises.subscribe('myEvent2', function (data, deferred) {
+        deferred.resolve();
       });
-      this.promise.always(function() {
-        done();
-      });
-      this.eventsWithPromises.publish('myEvent2', null, this.promise);
+      this.eventsWithPromises.publish('myEvent2', null)
+          .then(function(results){
+            self.rejected(results[0].state);
+            done();
+          });
     });
 
-    it("rejects the promise sent with the event when at least one listener has rejected theirs", function () {
-      assert.equal(this.promise.state(), 'rejected', 'promise resolved');
+    it("rejects the promise returned by publish when at least one listener has rejected theirs", function () {
+      sinon.assert.calledWith(this.rejected, 'rejected');
     });
 
   });
 
+  describe("throwing an error", function () {
+    var message = "test error";
+
+    beforeEach(function (done) {
+      var self = this;
+
+      this.eventsWithPromises.subscribe('myEvent3', function (data, deferred) {
+        deferred.resolve();
+      });
+      this.eventsWithPromises.subscribe('myEvent3', function (data, deferred) {
+        deferred.reject(Error(message));
+      });
+      this.eventsWithPromises.subscribe('myEvent3', function (data, deferred) {
+        deferred.resolve();
+      });
+      this.eventsWithPromises.publish('myEvent3', null)
+          .then(function(results){
+            self.error = results[1];
+            done();
+          });
+    });
+
+    it("passes an error object back up the chain", function () {
+      assert.equal(this.error.reason.constructor, Error, 'Error object passed');
+      assert.equal(this.error.reason.message, message, 'Error object passed');
+    });
+
+  });
 });
