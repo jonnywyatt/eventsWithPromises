@@ -100,7 +100,7 @@ describe("subscription", function () {
 
   });
 
-  describe("throwing an error", function () {
+  describe("rejecting with an error", function () {
     var message = "test error";
 
     beforeEach(function (done) {
@@ -116,7 +116,7 @@ describe("subscription", function () {
         deferred.resolve();
       });
       this.eventsWithPromises.publish('myEvent3', null)
-          .then(function(results){
+          .then(function(results) {
             self.error = results[1];
             done();
           });
