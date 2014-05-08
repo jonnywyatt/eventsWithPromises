@@ -7,10 +7,14 @@
     "karma-mocha": "~0.1.3",
     "chai": "~1.9.1",
     "karma-chai": "~0.1.0",
-    "karma-sinon-chai": "~0.1.5"
+    "karma-sinon-chai": "~0.1.5",
+    "karma-phantomjs-launcher": "^0.1.4"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/jonnywyatt/eventsWithPromises.git"
+  },
+  "scripts": {
+    "postinstall": "bower install"
   }
 }
