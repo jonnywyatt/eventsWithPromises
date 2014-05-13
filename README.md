@@ -14,6 +14,19 @@ An AMD module that returns an object literal with the following methods:
 * **unsubscribeAll** - remove all subscriptions for all event names
 * **publish** - Publish an event. This method returns a 'main' promise which can be acted on using 'then'. Every listener will be supplied with its own individual promise, which it can resolve or reject. If all the event listeners are resolved successfully, the main promise will be resolved. If even one of them is rejected or fails, the main promise will fail.
 
+```javascript
+eventsWithPromises.subscribe('myEvent', function (data, promise) {
+promise.resolve();
+});
+eventsWithPromises.subscribe('myEvent', function (data, promise) {
+promise.resolve();
+});
+eventsWithPromises.publish('myEvent', null)
+.then(function(results){
+// results is an array of all the listeners' results
+});
+```
+
 ## Setup
 
 ```
