@@ -16,15 +16,15 @@ An AMD module that returns an object literal with the following methods:
 
 ```javascript
 eventsWithPromises.subscribe('myEvent', function (data, promise) {
-promise.resolve();
+  promise.resolve();
 });
 eventsWithPromises.subscribe('myEvent', function (data, promise) {
-promise.resolve();
+  promise.resolve();
 });
 eventsWithPromises.publish('myEvent', null)
-.then(function(results){
-// results is an array of all the listeners' results
-});
+  .then(function(results){
+    // results is an array of all the listeners' results
+  });
 ```
 
 ## Setup
