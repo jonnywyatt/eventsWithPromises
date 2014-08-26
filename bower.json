@@ -7,6 +7,6 @@
     "test"
   ],
   "dependencies": {
-    "rsvp": null
+    "rsvp": "latest"
   }
 }
